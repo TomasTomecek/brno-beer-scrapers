@@ -7,11 +7,11 @@ Collection of JavaScript scrapers for pubs in Brno, Czech Republic. We care abou
 Usage
 =====
 
- node <script>.js
+    node script.js
 
 If you get traceback about missing module, install it:
 
- npm install "module"
+     npm install "module"
 
 For facebook stuff, you need to have facebook application for authentication. Currently scripts read stuff from environment variable.
 
