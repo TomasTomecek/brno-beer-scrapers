@@ -22,7 +22,6 @@ TODO
  * https://www.facebook.com/ToulavyKocourPub
  * https://www.facebook.com/pages/V%C3%BD%C4%8Dep-Na-stoj%C3%A1ka/365656933551335 (beer list in form of an image)
  * https://www.facebook.com/ochutnavkovapivnice
- * https://www.facebook.com/ualbertabrno
  * https://www.facebook.com/ZelenaKocka (beer list in form of an image)
  * ...
 
