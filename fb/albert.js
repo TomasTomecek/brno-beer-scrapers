@@ -1,4 +1,5 @@
 var l=console.log;
+var fb = require('./fb');
 
 function find_property(str, regex){
     try {
@@ -20,6 +21,10 @@ function extract(message){
 	    result.push(beer);
 	}
     });
-    l(result);
+    return result;
 }
 
+fb.FBParser.init({
+    path: "/ualbertabrno",
+    callback: extract
+});
