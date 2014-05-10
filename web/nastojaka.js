@@ -1,13 +1,21 @@
 var cheerio = require('cheerio');
 var request = require('request');
+var web = require('./web');
 var url = 'http://www.vycepnastojaka.cz/menu/'
 
 var l = console.log;
 
+function find_in_array(array, key, value) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i][key] === value) {
+            return array[i][key];
+        }
+    }
+    return null;
+}
+
 function scrape(html){
     var $ = cheerio.load(html);
-
-    l('Parser started.');
 
     result = []
 
@@ -17,18 +25,16 @@ function scrape(html){
     beer_cat.children('div.item').each(function() {
       var beer_elem = $(this);
       var beer = {
-          name: beer_elem.children('span.name').text(),
+          name: beer_elem.children('span.name').text().toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); }).replace(/^\d*\s*/, ""),
           amount: beer_elem.children('span.amount').text(),
           price: beer_elem.children('span.price').text(),
       };
-      result.push(beer);
+      if (find_in_array(result, 'name', beer.name) == null) {
+          result.push(beer);
+      }
     });
-
-    l(result);
-    l('Parser ended.');
+    return result;
 }
-
-var start = Date.now();
 
 request({
     uri: url,
@@ -36,9 +42,8 @@ request({
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4'
     }
 }, function (error, response, body) {
-    var req_time = Date.now() - start;
-    l('Request took ' + req_time + 'ms.');
     if (!error && response.statusCode == 200) {
-        scrape(body);
+        data = scrape(body);
+        web.post(data);
     }
 });
