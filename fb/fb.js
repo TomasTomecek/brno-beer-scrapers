@@ -20,7 +20,19 @@ var FBParser = {
     settings: null,
 
     init: function(settings) {
-        l("init %s", settings);
+        l("init", settings);
+        if (typeof process.env.APPID === 'undefined' || typeof process.env.SECRET === 'undefined') {
+            l("${APPID} or ${SECRET} is not defined; can't connect to FB");
+            return;
+        }
+        if (typeof process.env.UN === 'undefined' || typeof process.env.PW === 'undefined') {
+            l("${UN} or ${PW} is not defined; can't send data to web");
+            return;
+        }
+        if (typeof process.argv[2] === 'undefined') {
+            l("POST REST URL is not specified!");
+            return;
+        }
         this.settings = settings;
 	self = this;
 	this.open_connection();
@@ -64,19 +76,19 @@ var FBParser = {
     fetch_feed: function() {
         FB.api(self.settings.path, { fields: ['id', 'feed'] }, function (res) {
 	    l("process FB response");
-            if(!res || res.error) {
-                l(!res ? 'error occurred' : res.error);
-                return;
-            }
-            res.feed.data.map(function(item) {
-                if (!(typeof item.message === 'undefined')) {
-                    stuff = self.settings.callback(item.message);
-		    self.result.push({
-		        data: stuff,
-			date: Date.parse(item.updated_time)
-		    });
-                };
-            });
+        if(!res || res.error) {
+            l(!res ? 'error occurred' : res.error);
+            return;
+        }
+        res.feed.data.map(function(item) {
+            if (!(typeof item.message === 'undefined')) {
+                stuff = self.settings.callback(item.message);
+                self.result.push({
+                    data: stuff,
+                    date: Date.parse(item.updated_time)
+                });
+            };
+        });
 	    self.post(self.result);
         })
         
@@ -96,7 +108,7 @@ var FBParser = {
 	    return
             if (error || response.statusCode != 200) {
                 l(response.statusCode);
-		l(error);
+                l(error);
             }
         });
     }
