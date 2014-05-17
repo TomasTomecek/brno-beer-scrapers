@@ -1,6 +1,6 @@
 /*
 { id: '538580729567067_604731846285288',
-  from: 
+  from:
    { category: 'Restaurant/cafe',
      category_list: [ [Object], [Object] ],
      name: 'U Proutníka',
@@ -13,7 +13,7 @@
   type: 'photo',
   status_type: 'mobile_status_update',
   object_id: '604731802951959',
-  application: 
+  application:
    { name: 'Facebook for Android',
      namespace: 'fbandroid',
      id: '350685531728' },
@@ -39,12 +39,11 @@ var fb = require('./fb');
 //}
 
 function extract(message) {
-    l("extract message");
     var lines = message.split('\n');
     var result = [];
     var at_beer_list = false;
     var past_beer_list = false;
-    lines.map(function(item){
+    lines.forEach(function(item){
         beer = {name:'', brewery:''}
         if (at_beer_list) {
             item = item.replace(/^\s*/,'');
@@ -54,14 +53,14 @@ function extract(message) {
 		var name = item.substring(1).toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
                 var match = name.match(/\s*\d+\s*°/);
                 if (match != null) {
-                    beer['degree'] = match[0].replace(/^\s*/, '').replace(/°\s*$/, '');
+                    beer['epm'] = match[0].replace(/^\s*/, '').replace(/°\s*$/, '');
                     name = name.substring(0, match.index);
                 }
                 beer['name'] = name.replace(/\s*$/, '');
                 result.push(beer);
             } else if (item.indexOf('(') == 0) {
                 var brewery = item.substring(item.indexOf('(') + 1, item.indexOf(')'));
-                result.map(function(i) {
+                result.forEach(function(i) {
                     if (item.brewery === "") {
                         item['brewery'] = brewery;
                     }
@@ -81,5 +80,6 @@ function extract(message) {
 
 fb.FBParser.init({
     path: "/uproutnika",
-    callback: extract
+    callback: extract,
+    process_beers: true
 });

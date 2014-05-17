@@ -15,7 +15,7 @@ function extract(message){
     lines.map(function(item) {
         if (item.indexOf("*") == 0 || item.indexOf("-") == 0) {
 	    beer = {
-	        line: item.replace(/^[*-] /, ""),
+	        name: item.replace(/^[*-] /, ""),
 	        epm: find_property(item, /(\d+)°/)
 	    };
 	    result.push(beer);
@@ -26,5 +26,6 @@ function extract(message){
 
 fb.FBParser.init({
     path: "/ualbertabrno",
-    callback: extract
+    callback: extract,
+    process_beers: true
 });
