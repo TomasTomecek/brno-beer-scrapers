@@ -15,7 +15,6 @@ var FBParser = {
 
     /*
      * must have items:
-     *  path -- what we fetch
      *  callback -- function for processing beers -- makes sense only for 'process_beers'
      *  process_beers or process_news
      */
@@ -35,7 +34,12 @@ var FBParser = {
             l("POST REST URL is not specified!");
             return;
         }
-        this.url = process.argv[2];
+        if (typeof process.argv[3] === 'undefined') {
+            l("Target URL is not specified!");
+            return;
+        }
+        this.post_url = process.argv[2];
+        this.target_url = process.argv[3];
         this.settings = settings;
         self = this;
         this.open_connection();
@@ -78,7 +82,7 @@ var FBParser = {
      * callback is function which process one post, NOT just a message
      */
     fetch_feed: function() {
-        FB.api(self.settings.path, { fields: ['id', 'feed'] }, function (res) {
+        FB.api(self.target_url, { fields: ['id', 'feed'] }, function (res) {
             l("process FB response");
             if(!res || res.error) {
                 l(!res ? 'error occurred' : res.error);
@@ -89,7 +93,7 @@ var FBParser = {
                 if (!(typeof item.message === 'undefined')) {
                     stuff = self.settings.callback(item.message);
                     if (stuff.length > 0) {
-                        scrape.submit(stuff, self.url);
+                        scrape.submit(stuff, self.post_url);
                         return;
                     }
                 }
@@ -99,7 +103,7 @@ var FBParser = {
 
     submit_news: function() {
         var now = Date.now();
-        FB.api(self.settings.path, { fields: ['id', 'feed'] }, function (res) {
+        FB.api(self.target_url, { fields: ['id', 'feed'] }, function (res) {
             l("FB request took", Date.now() - now, "ms");
             if(!res || res.error) {
                 l(!res ? 'error occurred' : res.error);
@@ -122,7 +126,7 @@ var FBParser = {
                     }
                 }
             }
-            scrape.submit(news, self.url);
+            scrape.submit(news, self.post_url);
         });
     }
 };

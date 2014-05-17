@@ -1,7 +1,6 @@
 var cheerio = require('cheerio');
 var request = require('request');
 var web = require('./web');
-var url = 'http://ochutnavkovapivnice.cz/prave_na_cepu/'
 
 var l = console.log;
 
@@ -31,5 +30,4 @@ function scrape(html){
 
 web.init({
     callback: scrape,
-    url: url,
 });

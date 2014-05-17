@@ -79,7 +79,6 @@ function extract(message) {
 }
 
 fb.FBParser.init({
-    path: "/uproutnika",
     callback: extract,
     process_beers: true
 });

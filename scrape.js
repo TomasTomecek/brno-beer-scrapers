@@ -15,6 +15,7 @@ var url_base = "http://localhost:3000"
  */
 scrape_utils = {
     submit: function(stuff, url) {
+        l("send stuff to", url);
         request.post({
             uri: url,
             headers: {

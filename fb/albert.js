@@ -25,7 +25,6 @@ function extract(message){
 }
 
 fb.FBParser.init({
-    path: "/ualbertabrno",
     callback: extract,
     process_beers: true
 });

@@ -26,7 +26,12 @@ WebParser = {
             l("POST REST URL is not specified!");
             return;
         }
-        this.url = process.argv[2];
+        if (typeof process.argv[3] === 'undefined') {
+            l("Target URL is not specified!");
+            return;
+        }
+        this.post_url = process.argv[2];
+        this.target_url = process.argv[3];
         this.settings = settings;
         self = this;
         this.fetch();
@@ -34,14 +39,14 @@ WebParser = {
 
     fetch: function(){
         request({
-            uri: self.settings.url,
+            uri: self.target_url,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4'
             }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 stuff = self.settings.callback(body);
-                scrape.submit(stuff, self.url);
+                scrape.submit(stuff, self.post_url);
             }
         });
     }

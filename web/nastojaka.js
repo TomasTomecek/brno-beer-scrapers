@@ -1,7 +1,6 @@
 var cheerio = require('cheerio');
 var request = require('request');
 var web = require('./web');
-var url = 'http://www.vycepnastojaka.cz/menu/'
 
 var l = console.log;
 
@@ -38,5 +37,4 @@ function scrape(html){
 
 web.init({
     callback: scrape,
-    url: url,
 });
