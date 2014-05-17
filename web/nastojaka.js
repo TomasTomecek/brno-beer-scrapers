@@ -36,14 +36,7 @@ function scrape(html){
     return result;
 }
 
-request({
-    uri: url,
-    headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4'
-    }
-}, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-        data = scrape(body);
-        web.post(data);
-    }
+web.init({
+    callback: scrape,
+    url: url,
 });

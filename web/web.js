@@ -1,23 +1,50 @@
+/*
+ * general purpose module for scraping websites
+ */
 var request = require('request');
 var l = console.log;
+var scrape = require("../scrape");
+var self = null;
 
-function post(stuff) {
-    l(stuff);
-    request.post({
-        uri: "http://127.0.0.1",
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4'
-    },
-    json: stuff
-    }, function (error, response, body) {
-    return
-        if (error || response.statusCode != 200) {
-            l(response.statusCode);
-	l(error);
+WebParser = {
+    result: [],
+
+    /*
+     * must have items:
+     *  url -- what we fetch
+     *  callback -- function to process stuff, has to take one argument
+     */
+    settings: null,
+
+    init: function(settings) {
+        l("init", settings);
+        if (typeof process.env.BEER_UN === 'undefined' || typeof process.env.BEER_PW === 'undefined') {
+            l("${BEER_UN} or ${BEER_PW} is not defined; can't send data to web");
+            return;
         }
-    });
+        if (typeof process.argv[2] === 'undefined') {
+            l("POST REST URL is not specified!");
+            return;
+        }
+        this.url = process.argv[2];
+        this.settings = settings;
+        self = this;
+        this.fetch();
+    },
+
+    fetch: function(){
+        request({
+            uri: self.settings.url,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4'
+            }
+        }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                stuff = self.settings.callback(body);
+                scrape.submit(stuff, self.url);
+            }
+        });
+    }
 }
 
-module.exports = {
-    post: post
-};
+module.exports = WebParser;
