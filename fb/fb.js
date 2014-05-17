@@ -1,21 +1,23 @@
 /*
  * Superclass for specific parsers:
- *  
+ *
  *  it downloads feed from FB
  */
 var l = console.log;
 var FB = require('fb');
 var request = require("request");
+var scrape = require("../scrape");
 var self = null;
 
 var FBParser = {
     result: [],
     token: null,
-    
+
     /*
      * must have items:
      *  path -- what we fetch
-     *  callback -- function to process stuff, has to take one argument
+     *  callback -- function for processing beers -- makes sense only for 'process_beers'
+     *  process_beers or process_news
      */
     settings: null,
 
@@ -25,17 +27,18 @@ var FBParser = {
             l("${APPID} or ${SECRET} is not defined; can't connect to FB");
             return;
         }
-        if (typeof process.env.UN === 'undefined' || typeof process.env.PW === 'undefined') {
-            l("${UN} or ${PW} is not defined; can't send data to web");
+        if (typeof process.env.BEER_UN === 'undefined' || typeof process.env.BEER_PW === 'undefined') {
+            l("${BEER_UN} or ${BEER_PW} is not defined; can't send data to web");
             return;
         }
         if (typeof process.argv[2] === 'undefined') {
             l("POST REST URL is not specified!");
             return;
         }
+        this.url = process.argv[2];
         this.settings = settings;
-	self = this;
-	this.open_connection();
+        self = this;
+        this.open_connection();
     },
 
     /*
@@ -49,8 +52,8 @@ var FBParser = {
                 client_secret: process.env.SECRET,
                 grant_type: 'client_credentials'
             },
-	    this.set_token
-	);
+            this.set_token
+        );
     },
 
     /*
@@ -62,12 +65,13 @@ var FBParser = {
             l(!res ? 'error occurred' : res.error);
             return;
         }
-
-        this.token = res.access_token;
-
-        FB.setAccessToken(this.token);
-
-	self.fetch_feed();
+        self.token = res.access_token;
+        FB.setAccessToken(self.token);
+        if (self.settings.process_beers) {
+            self.fetch_feed();
+        } else if (self.settings.process_news) {
+            self.submit_news();
+        }
     },
 
     /* path is a name of FB page to fetch
@@ -75,41 +79,50 @@ var FBParser = {
      */
     fetch_feed: function() {
         FB.api(self.settings.path, { fields: ['id', 'feed'] }, function (res) {
-	    l("process FB response");
-        if(!res || res.error) {
-            l(!res ? 'error occurred' : res.error);
-            return;
-        }
-        res.feed.data.map(function(item) {
-            if (!(typeof item.message === 'undefined')) {
-                stuff = self.settings.callback(item.message);
-                self.result.push({
-                    data: stuff,
-                    date: Date.parse(item.updated_time)
-                });
-            };
+            l("process FB response");
+            if(!res || res.error) {
+                l(!res ? 'error occurred' : res.error);
+                return;
+            }
+            for(var i = 0; i<res.feed.data.length; i++) {
+                item = res.feed.data[i];
+                if (!(typeof item.message === 'undefined')) {
+                    stuff = self.settings.callback(item.message);
+                    if (stuff.length > 0) {
+                        scrape.submit(stuff, self.url);
+                        return;
+                    }
+                }
+            }
         });
-	    self.post(self.result);
-        })
-        
     },
 
-    /*
-     * send processed stuff to app
-     */
-    post: function (stuff) {
-        request.post({
-            uri: "http://127.0.0.1",
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4'
-	    },
-	    json: stuff
-        }, function (error, response, body) {
-	    return
-            if (error || response.statusCode != 200) {
-                l(response.statusCode);
-                l(error);
+    submit_news: function() {
+        var now = Date.now();
+        FB.api(self.settings.path, { fields: ['id', 'feed'] }, function (res) {
+            l("FB request took", Date.now() - now, "ms");
+            if(!res || res.error) {
+                l(!res ? 'error occurred' : res.error);
+                return;
             }
+            var count = 5;  // amount of news items to process
+            var news = []
+            for(var i = 0; i<res.feed.data.length; i++) {
+                item = res.feed.data[i];
+                if (!(typeof item.message === 'undefined')) {
+                    news.push({
+                        id: item.id,
+                        message: item.message,
+                        updated_time: Date(item.updated_time),
+                    });
+                    if (count == 0) {
+                        break;
+                    } else {
+                        count--;
+                    }
+                }
+            }
+            scrape.submit(news, self.url);
         });
     }
 };
