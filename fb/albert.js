@@ -15,7 +15,7 @@ function extract(message){
     lines.map(function(item) {
         if (item.indexOf("*") == 0 || item.indexOf("-") == 0) {
 	    beer = {
-	        name: item.replace(/^[*-] /, ""),
+	        name: item.replace(/^[*-]\s*/, ""),
 	        epm: find_property(item, /(\d+)°/)
 	    };
 	    result.push(beer);
