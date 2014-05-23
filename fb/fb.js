@@ -117,7 +117,7 @@ var FBParser = {
                     news.push({
                         id: item.id,
                         message: item.message,
-                        updated_time: Date(item.updated_time),
+                        updated_time: new Date(item.updated_time),
                     });
                     if (count == 0) {
                         break;
