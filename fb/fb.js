@@ -31,8 +31,9 @@ var FBParser = {
             return;
         }
         this.debug = false;
-        if (typeof process.argv[2] === 'undefined' && process.argv[2].indexOf('debug') != -1) {
+        if (typeof process.argv[2] !== 'undefined' && process.argv[2].indexOf('debug') != -1) {
             this.debug = true;
+            l("DEBUG MODE");
         }
         if (typeof process.argv[2] === 'undefined') {
             l("POST REST URL is not specified!");
@@ -141,7 +142,11 @@ var FBParser = {
                     }
                 }
             }
-            scrape.submit(news, self.post_url);
+            if(self.debug) {
+                l('NEWS:', news);
+            } else {
+                scrape.submit(news, self.post_url);
+            }
         });
     }
 };

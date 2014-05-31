@@ -4,7 +4,7 @@ var removeDiacritics = require('diacritics').remove;
 
 function extract(message) {
     var clean_msg = removeDiacritics(message);
-    if (clean_msg.indexOf("na treti pipe") != -1) {
+    if (clean_msg.toLowerCase().indexOf("na treti pipe") != -1) {
         return message;
     }
     return null;
