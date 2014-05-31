@@ -31,7 +31,7 @@ var FBParser = {
             return;
         }
         this.debug = false;
-        if (typeof process.argv[2] === 'debug') {
+        if (typeof process.argv[2] === 'undefined' && process.argv[2].indexOf('debug') != -1) {
             this.debug = true;
         }
         if (typeof process.argv[2] === 'undefined') {
@@ -123,7 +123,7 @@ var FBParser = {
                 item = res.feed.data[i];
                 if (!(typeof item.message === 'undefined')) {
                     var msg = item.message;
-                    if (self.settings.callback !== 'undefined') {
+                    if (typeof self.settings.callback !== 'undefined') {
                         msg = self.settings.callback(msg);
                         if (msg == null) {
                             continue;
