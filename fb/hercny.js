@@ -7,6 +7,10 @@ function extract(message) {
     var at_beer_list = false;
     var past_beer_list = false;
     lines.forEach(function(item){
+        if(item.toLowerCase().indexOf('srdce') >= 0) {
+            past_beer_list = true;
+            at_beer_list = false;
+        }
         beer = {name:'', ibu:'', epm:'', price:''}
         if (at_beer_list) {
             //price
@@ -22,19 +26,15 @@ function extract(message) {
             }
             
             //abv
-            var abv_match = name.match(/(\d+)\s*°/);
+            var abv_match = item.match(/([\d,]+)\s*°/);
             if (abv_match != null) {
                 beer['abv'] = abv_match[1];
-                beer['name'] = item.substring(abv_match.index);
+                beer['name'] = item.substring(0, abv_match.index).replace(/\s*$/, '');
             } else {
-                name_match = item.match(/^([^,0-9])[,0-9]/);
-                beer['name'] = name_match[1];
+                name_match = item.match(/^([^,0-9]+)/);
+                beer['name'] = name_match[1].replace(/\s*$/, '');
             }
             result.push(beer);
-        }
-        if(item.toLowerCase().indexOf('srdce') >= 0) {
-            past_beer_list = true;
-            at_beer_list = false;
         }
         if(item.toLowerCase().indexOf('ahoj,') >= 0 && ! past_beer_list) {
             at_beer_list = true;
