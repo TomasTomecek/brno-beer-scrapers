@@ -30,6 +30,10 @@ var FBParser = {
             l("${BEER_UN} or ${BEER_PW} is not defined; can't send data to web");
             return;
         }
+        this.debug = false;
+        if (typeof process.argv[2] === 'debug') {
+            this.debug = true;
+        }
         if (typeof process.argv[2] === 'undefined') {
             l("POST REST URL is not specified!");
             return;
@@ -93,8 +97,12 @@ var FBParser = {
                 if (!(typeof item.message === 'undefined')) {
                     stuff = self.settings.callback(item.message);
                     if (stuff.length > 0) {
-                        scrape.submit(stuff, self.post_url);
-                        return;
+                        if (self.debug) {
+                            l(stuff);
+                        } else {
+                            scrape.submit(stuff, self.post_url);
+                            return;
+                        }
                     }
                 }
             }
@@ -114,9 +122,16 @@ var FBParser = {
             for(var i = 0; i<res.feed.data.length; i++) {
                 item = res.feed.data[i];
                 if (!(typeof item.message === 'undefined')) {
+                    var msg = item.message;
+                    if (self.settings.callback !== 'undefined') {
+                        msg = self.settings.callback(msg);
+                        if (msg == null) {
+                            continue;
+                        }
+                    }
                     news.push({
                         id: item.id,
-                        message: item.message,
+                        message: msg,
                         updated_time: new Date(item.updated_time),
                     });
                     if (count == 0) {
